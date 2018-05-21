@@ -1,2 +1,2 @@
 # test
-gust a random files
+just a random files
