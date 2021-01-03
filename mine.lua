@@ -2,8 +2,10 @@ local IC = require("component").inventory_controller
 local R=require("component").robot
 local RA = require("robot")
 local C = require("computer")
+local G = require("component").generator
 local sides = require("sides")
 local shell = require("shell")
+
 
 local args, ops = shell.parse(...)
 
@@ -14,21 +16,12 @@ local retToLoc=false
 local invS=R.inventorySize()
 local EInvS=IC.getInventorySize(sides.down)
 
-function checkPower(onBase)
-  if not onBase and C.energy()/C.maxEnergy()<0.15 then
-    return true
-  else
-    return false
-  end
-  if onBase and C.energy()/C.maxEnergy()>0.99 then
-    return true
-  else
-    return false
-  end
+function checkPower()
+  return C.energy()/C.maxEnergy()
 end
 
 function checkInv()
-  if R.count(invS)>0 then
+  if R.count(invS-4)>0 then
     return true
   else
     return false
@@ -57,15 +50,22 @@ function digSlice(dist)
 
   RA.turnAround()
   RA.forward()
-  if dist%7==0 and R.count()>1 then
+  if dist%7==0 then
     RA.place()
   end
   RA.turnRight()
 end
 
+function load()
+  R.select(1)
+  IC.suckFromSlot(sides.down,1,64-R.count())
+  R.select(2)
+  IC.suckFromSlot(sides.down,2,64-R.count())
+end
+
 function unload()
   local i=3
-  local j=1
+  local j=3
     
   while i<=invS do
     R.select(i)
@@ -88,10 +88,19 @@ function returnToBase(dist)
   local i=0
   while i<dist do
     RA.back()
+    if checkPower()<0.05 then
+      R.select(1)
+      G.insert()
+      R.select(2)
+    end
     i=i+1
   end
+  R.select(1)
+  G.remove()
+  R.select(2)
+  load()
   unload()
-  while checkPower(true) do
+  while checkPower()<0.99 do
     os.sleep(20)
   end
 end
@@ -105,7 +114,7 @@ function returnToLoc(dist)
 end
 
 while mined<tonumber(args[1]) do
-  if checkPower(false) or checkInv() then
+  if checkPower()<0.15 or checkInv() or R.count(2)<=1 then
     returnToBase(mined)
     returnToLoc(mined)
   end
