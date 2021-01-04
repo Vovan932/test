@@ -28,6 +28,8 @@ function checkInv()
   end
 end
 
+
+
 function digSlice(dist)
   RA.swing(sides.forward)
   RA.forward()
@@ -100,7 +102,9 @@ function returnToBase(dist)
   R.select(2)
   load()
   unload()
-  while checkPower()<0.99 do
+  while checkPower()<0.99 or R.durability()<=0.05 do
+    C.beep(600)
+    C.beep(400)
     os.sleep(20)
   end
 end
@@ -114,7 +118,7 @@ function returnToLoc(dist)
 end
 
 while mined<tonumber(args[1]) do
-  if checkPower()<0.15 or checkInv() or R.count(2)<=1 then
+  if checkPower()<0.15 or checkInv() or R.count(2)<=1 or R.durability()<=0.05 then
     returnToBase(mined)
     returnToLoc(mined)
   end
