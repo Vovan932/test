@@ -22,7 +22,7 @@ SELECT reverse_byte_pairs('40D4FCE9DD32FD57') AS reversed_string;
 
 This T-SQL function replicates the logic of the PostgreSQL `reverse_byte_pairs` function for MSSQL. It processes the input string from right to left, taking two characters at a time and appending them to the result.
 
-```sql
+
 CREATE OR ALTER FUNCTION reverse_byte_pairs_mssql(@input_string NVARCHAR(MAX))
 RETURNS NVARCHAR(MAX)
 AS
